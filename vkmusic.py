@@ -11,9 +11,8 @@ def dlProgress(count, blockSize, totalSize):
     sys.stdout.flush()
 
 if __name__ == "__main__":
-    email = 'o'
-    passw = 'o'
-    uid = ""
+    email = raw_input('E-Mail:')
+    passw = getpass.getpass()
     d = StringIO.StringIO()
     c = pycurl.Curl()
     c.setopt(c.COOKIEJAR, 'cookie.txt')
@@ -23,7 +22,7 @@ if __name__ == "__main__":
     c.setopt(c.WRITEFUNCTION, d.write)
     c.setopt(c.URL, 'http://vk.com/audio')
     c.setopt(c.POST, 1)
-    c.setopt(c.POSTFIELDS, 'act=load_audios_silent&al=1&edit=0&gid=0&id='+uid)
+    c.setopt(c.POSTFIELDS, 'act=load_audios_silent&al=1&edit=0&gid=0')
     c.perform()
     c.close()
     s = d.getvalue()

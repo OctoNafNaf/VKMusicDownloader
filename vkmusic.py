@@ -39,7 +39,7 @@ if __name__ == "__main__":
         pass
     cnt = 0
     for je in j:
-		cnt = cnt + 1
+        cnt = cnt + 1
     print 'Found %d files.' % (cnt)
     cnt = 1
     for je in j:

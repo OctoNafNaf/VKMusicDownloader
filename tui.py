@@ -63,8 +63,6 @@ def run():
     showFiles(vk)   
     print ''
     download(vk) 
-    if os.path.exists('cookie.txt'):
-        os.remove('cookie.txt')
         
 if __name__ == "__main__":
     run()

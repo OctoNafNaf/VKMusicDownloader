@@ -63,8 +63,7 @@ class VKMusic:
         try:
             j = json.loads(s)
         except:
-            print 'Error while parsing music list :('
-            exit(1)
+            raise VKMusicError('Error while parsing music list')
         return j
         
     def isLoggedIn(self):
@@ -88,6 +87,13 @@ class VKMusic:
         path = os.path.join(self.fdir, fname)
         urlretrieve(link, path, sfunc)
         
+class VKMusicError(Exception):
+    def __init__(self, value):
+        self.value = value
+    
+    def __str__(self):
+        return repr(self.value)
+
 class FileInfo:
     def __init__(self, fi):
         self.uid = fi[0]

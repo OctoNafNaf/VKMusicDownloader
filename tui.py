@@ -30,7 +30,7 @@ if __name__ == "__main__":
     if not st.startswith('n'):
         for i in xrange(files):
             j = vk.fileInfo(i)
-            print str(i + 1) + '. %s - %s (%s)' % (j[5], j[6], j[4])
+            print str(i + 1) + '. ' + j.strFormat()
             
     print ''
     st = raw_input('Start downloading? [y]/n ')
@@ -42,12 +42,12 @@ if __name__ == "__main__":
             pass
         for i in xrange(files):
             j = vk.fileInfo(i)
-            author = j[5]
-            name = j[6]
+            author = j.author
+            name = j.title
             author = author.replace('/', ' and ').replace('\\', ' and ')
             name = name.replace('/', ' and ').replace('\\', ' and ')
-            print str(i + 1) + '. Downloading %s - %s (%s)' % (author, name, j[4])
-            urlretrieve(j[2], 'vk_music/' + author + ' - ' + name + '.mp3', reporthook=showProgress)
+            print str(i + 1) + '. Downloading ' + j.strFormat()
+            urlretrieve(j.link, 'vk_music/' + author + ' - ' + name + '.mp3', reporthook=showProgress)
             print ' OK'
             
     if os.path.exists('cookie.txt'):

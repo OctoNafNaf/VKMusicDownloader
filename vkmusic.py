@@ -57,7 +57,7 @@ class VKMusic:
             print 'Error while parsing music list :('
             exit(1)
         return j
-            
+        
     def isLoggedIn(self):
         return self.loggedIn
         
@@ -65,4 +65,16 @@ class VKMusic:
         return len(self.mlist)
         
     def fileInfo(self, i):
-        return self.mlist[i]
+        return FileInfo(self.mlist[i])
+        
+class FileInfo:
+    def __init__(self, fi):
+        self.uid = fi[0]
+        self.srcuid = fi[1]
+        self.link = fi[2]
+        self.duration = fi[4]
+        self.author = fi[5]
+        self.title = fi[6]
+        
+    def strFormat(self):
+        return '%s - %s (%s)' % (self.author, self.title, self.duration)

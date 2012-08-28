@@ -6,16 +6,17 @@ from urllib import urlretrieve
 class VKMusic:
     fdir = 'vk_music'
 
-    def __init__(self, email, passw):
-        if os.path.exists('cookie.txt'):
-            os.remove('cookie.txt')
+    def __init__(self, email, passw, cookie='cookie.txt'):
+        self.cookieFile = cookie
+        if os.path.exists(self.cookieFile):
+            os.remove(self.cookieFile)
         self.loggedIn = self.doLogin(email, passw)
         if self.loggedIn:
             self.mlist = self.getMusicList()
         
     def __del__(self):
-        if os.path.exists('cookie.txt'):
-            os.remove('cookie.txt')
+        if os.path.exists(self.cookieFile):
+            os.remove(self.cookieFile)
     
     def doLogin(self, email, passw):
         d = self.d = StringIO.StringIO()
@@ -23,8 +24,8 @@ class VKMusic:
 
         c.setopt(c.VERBOSE, 0)
         c.setopt(c.WRITEFUNCTION, d.write)
-        c.setopt(c.COOKIEJAR, 'cookie.txt')
-        c.setopt(c.COOKIEFILE, 'cookie.txt')
+        c.setopt(c.COOKIEJAR, self.cookieFile)
+        c.setopt(c.COOKIEFILE, self.cookieFile)
         c.setopt(c.URL, 'vk.com/login.php?email=' + 
                             email + '&pass=' + passw)
         c.perform()

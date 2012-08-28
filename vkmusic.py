@@ -10,7 +10,8 @@ class VKMusic:
         if os.path.exists('cookie.txt'):
             os.remove('cookie.txt')
         self.loggedIn = self.doLogin(email, passw)
-        self.mlist = self.getMusicList()
+        if self.loggedIn:
+            self.mlist = self.getMusicList()
         
     def __del__(self):
         if os.path.exists('cookie.txt'):
@@ -32,6 +33,7 @@ class VKMusic:
         c.perform()
         data = d.getvalue()
         id_match = re.findall(r"id: (\d+),", data)
+        vk_id = -1
         if len(id_match) > 0:
             vk_id = int(id_match[0])
         self.vk_id = vk_id

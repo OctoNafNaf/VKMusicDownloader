@@ -22,7 +22,7 @@ def select(msg, choice, default):
     sp = sp.replace(default, '[%s]' % default)
     s = raw_input("%s (%s): " % (msg, sp))
     if (len(s) > 0) and (s[0] in choice):
-        return s
+        return s[0]
     return default
     
 def showFiles(vk):

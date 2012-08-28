@@ -11,7 +11,7 @@ def showProgress(count, blockSize, totalSize):
     sys.stdout.write("\r" + "%d%% %.2f/%.2f Mb" % (percent, yet, tot))
     sys.stdout.flush()
 
-if __name__ == "__main__":
+def run():
     email = raw_input('E-Mail: ')
     passw = getpass.getpass()
     
@@ -52,3 +52,6 @@ if __name__ == "__main__":
             
     if os.path.exists('cookie.txt'):
         os.remove('cookie.txt')
+        
+if __name__ == "__main__":
+    run()

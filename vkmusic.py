@@ -4,6 +4,8 @@ import pycurl, StringIO, re, urllib, os, getpass, json, sys
 from urllib import urlretrieve
 
 class VKMusic:
+    fdir = 'vk_music'
+
     def __init__(self, email, passw):
         if os.path.exists('cookie.txt'):
             os.remove('cookie.txt')
@@ -71,6 +73,18 @@ class VKMusic:
     def fileInfo(self, i):
         return FileInfo(self.mlist[i])
         
+    def setDir(self, newdir):
+        self.fdir = newdir
+    
+    def fileDownload(self, i, fname, sfunc):
+        try:
+            os.makedirs(self.fdir)
+        except OSError:
+            pass
+        link = self.fileInfo(i).link
+        path = os.path.join(self.fdir, fname)
+        urlretrieve(link, path, sfunc)
+        
 class FileInfo:
     def __init__(self, fi):
         self.uid = fi[0]
@@ -82,3 +96,10 @@ class FileInfo:
         
     def strFormat(self):
         return '%s - %s (%s)' % (self.author, self.title, self.duration)
+        
+    def pathAuthor(self):
+        return self.author.replace('/', ' and ').replace('\\', ' and ')
+        
+    def pathTitle(self):
+        return self.title.replace('/', ' and ').replace('\\', ' and ')
+        

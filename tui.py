@@ -36,19 +36,13 @@ def showFiles(vk):
             
 def download(vk):
     st = select('Start downloading?', 'yn', 'y')
-    if st == 'y':	
-        try:
-            os.makedirs('vk_music')
-        except OSError:
-            pass
+    if st == 'y':
         for i in xrange(vk.filesCount()):
             j = vk.fileInfo(i)
-            author = j.author
-            name = j.title
-            author = author.replace('/', ' and ').replace('\\', ' and ')
-            name = name.replace('/', ' and ').replace('\\', ' and ')
+            author = j.pathAuthor()
+            name = j.pathTitle()
             print str(i + 1) + '. Downloading ' + j.strFormat()
-            urlretrieve(j.link, 'vk_music/' + author + ' - ' + name + '.mp3', reporthook=showProgress)
+            vk.fileDownload(i, "%s - %s.mp3" % (author, name), showProgress)
             print ' OK'
 
 def showProgress(count, blockSize, totalSize):
@@ -62,7 +56,7 @@ def run():
     vk = login()
     showFiles(vk)   
     print ''
-    download(vk) 
+    download(vk)
         
 if __name__ == "__main__":
     run()

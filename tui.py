@@ -4,43 +4,44 @@ from vkmusic import VKMusic
 from urllib import urlretrieve
 import getpass, sys, os
 
-def showProgress(count, blockSize, totalSize):
-    percent = int(count*blockSize*100/totalSize)
-    yet = float(count*blockSize) / (1024.0 * 1024.0)
-    tot = float(totalSize) / (1024.0 * 1024.0)
-    sys.stdout.write("\r" + "%d%% %.2f/%.2f Mb" % (percent, yet, tot))
-    sys.stdout.flush()
+def userError(msg):
+    print >> sys.stderr, msg
+    exit(0)
 
-def run():
+def login():
     email = raw_input('E-Mail: ')
     passw = getpass.getpass()
-    
     vk = VKMusic(email, passw)
-	
     loggedIn = vk.isLoggedIn()
     if not loggedIn:
-        print >> sys.stderr, u'Wrong password/e-mail :('
-        exit(0)
-   
-        
+        userError(u'Wrong password/e-mail :(')
+    return vk
+    
+def select(msg, choice, default):
+    sp = ('/'.join(choice))
+    sp = sp.replace(default, '[%s]' % default)
+    s = raw_input("%s (%s): " % (msg, sp))
+    if (len(s) > 0) and (s[0] in choice):
+        return s
+    return default
+    
+def showFiles(vk):
     files = vk.filesCount()
     print 'Found %d files.' % (files)
-    st = raw_input('Print all? [y]/n ')
-    
-    if not st.startswith('n'):
+    st = select('Print all?', 'yn', 'y')
+    if st == 'y':
         for i in xrange(files):
             j = vk.fileInfo(i)
             print str(i + 1) + '. ' + j.strFormat()
             
-    print ''
-    st = raw_input('Start downloading? [y]/n ')
-    if not st.startswith('n'):
-				
+def download(vk):
+    st = select('Start downloading?', 'yn', 'y')
+    if st == 'y':	
         try:
             os.makedirs('vk_music')
         except OSError:
             pass
-        for i in xrange(files):
+        for i in xrange(vk.filesCount()):
             j = vk.fileInfo(i)
             author = j.author
             name = j.title
@@ -49,7 +50,19 @@ def run():
             print str(i + 1) + '. Downloading ' + j.strFormat()
             urlretrieve(j.link, 'vk_music/' + author + ' - ' + name + '.mp3', reporthook=showProgress)
             print ' OK'
-            
+
+def showProgress(count, blockSize, totalSize):
+    percent = int(count*blockSize*100/totalSize)
+    yet = float(count*blockSize) / (1024.0 * 1024.0)
+    tot = float(totalSize) / (1024.0 * 1024.0)
+    sys.stdout.write("\r" + "%d%% %.2f/%.2f Mb" % (percent, yet, tot))
+    sys.stdout.flush()
+
+def run():
+    vk = login()
+    showFiles(vk)   
+    print ''
+    download(vk) 
     if os.path.exists('cookie.txt'):
         os.remove('cookie.txt')
         

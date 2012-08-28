@@ -9,6 +9,10 @@ class VKMusic:
             os.remove('cookie.txt')
         self.loggedIn = self.doLogin(email, passw)
         self.mlist = self.getMusicList()
+        
+    def __del__(self):
+        if os.path.exists('cookie.txt'):
+            os.remove('cookie.txt')
     
     def doLogin(self, email, passw):
         d = self.d = StringIO.StringIO()

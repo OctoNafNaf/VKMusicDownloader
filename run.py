@@ -10,7 +10,7 @@ if __name__ == "__main__":
         vopt = args[1]
     if vopt == 'tui':
         tui.run()
-    else if vopt == 'gui':
+    elif vopt == 'gui':
         gui.run()
     else:
         print "Unknown option '%s'" % vopt

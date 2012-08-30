@@ -10,5 +10,6 @@ Also, you can run this script with other interfaces. Usage:
 Now support this interfaces:
 
 * tui
+* gui
 
 Enjoy!

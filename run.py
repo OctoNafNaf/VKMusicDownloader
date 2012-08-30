@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, tui, gui
+import sys
 
 if __name__ == "__main__":
     args = sys.argv
@@ -9,8 +9,10 @@ if __name__ == "__main__":
     else:
         vopt = args[1]
     if vopt == 'tui':
+	import tui
         tui.run()
     elif vopt == 'gui':
+        import gui
         gui.run()
     else:
         print "Unknown option '%s'" % vopt

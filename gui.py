@@ -38,7 +38,7 @@ class VKGtk(gtk.Window):
         self.add(st)
         
         self.connect("destroy", gtk.main_quit)
-        self.set_title("VKMusikDownloader")
+        self.set_title("VKMusicDownloader")
         self.set_size_request(500, 300)
         self.show_all()
         

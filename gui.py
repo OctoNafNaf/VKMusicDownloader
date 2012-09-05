@@ -103,6 +103,7 @@ class VKGtk(gtk.Window):
         email = self.mailEntry.get_text()
         passw = self.passEntry.get_text()
         self.vk = VKMusic(email, passw)
+        self.dc = self.fc = self.vk.filesCount()
         if self.vk.isLoggedIn():
             self.st.append_page(self.createMusicPage())
             self.resize(800, 500)
@@ -114,18 +115,19 @@ class VKGtk(gtk.Window):
         self.resize(500, 300)
         self.show_all()
         self.st.next_page()
-        self.fc = self.vk.filesCount()
+        self.k = 0
         for i in xrange(self.fc):
-            self.i = i
-            fi = self.vk.fileInfo(i)
-            text = "%d. %s" % (i + 1, fi.strFormat())
-            self.progressLabel.set_text(text)
-            fname = "%s - %s.mp3" % (fi.pathAuthor(), fi.pathTitle())
-            self.vk.fileDownload(i, fname, self.show_progress)
+            if self.store[i][0]:
+                fi = self.vk.fileInfo(i)
+                text = "%d. %s" % (i + 1, fi.strFormat())
+                self.progressLabel.set_text(text)
+                fname = "%s - %s.mp3" % (fi.pathAuthor(), fi.pathTitle())
+                self.vk.fileDownload(i, fname, self.show_progress)
+                self.k += 1
             
     def show_progress(self, a, b, c):
         lp = float(a * b) / c
-        tp = float(self.i) / self.fc + lp / self.fc
+        tp = float(self.k) / self.dc + lp / self.dc
         self.totalProgress.set_fraction(tp)
         self.totalProgress.set_text("%.2f%%" % (tp * 100))
         self.localProgress.set_fraction(lp)
@@ -134,6 +136,10 @@ class VKGtk(gtk.Window):
         
     def cell_toggled(self, widget, path, model):
         model[path][0] = not model[path][0]
+        if model[path][0]:
+            self.dc -= 1
+        else:
+            self.dc += 1
 
 def run():
     window = VKGtk()

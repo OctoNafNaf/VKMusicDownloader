@@ -1,10 +1,50 @@
 #!/usr/bin/python
 
-import pycurl, StringIO, re, urllib, os, getpass, json, sys
+import pycurl, StringIO, re, urllib, os, getpass, json, sys, urllib2, cookielib
 from urllib import urlretrieve
+from HTMLParser import HTMLParser
+from urlparse import urlparse
+
+class FormParser(HTMLParser):
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.url = None
+        self.params = {}
+        self.in_form = False
+        self.form_parsed = False
+        self.method = "GET"
+
+    def handle_starttag(self, tag, attrs):
+        tag = tag.lower()
+        if tag == "form":
+            if self.form_parsed:
+                raise RuntimeError("Second form on page")
+            if self.in_form:
+                raise RuntimeError("Already in form")
+            self.in_form = True 
+        if not self.in_form:
+            return
+        attrs = dict((name.lower(), value) for name, value in attrs)
+        if tag == "form":
+            self.url = attrs["action"] 
+            if "method" in attrs:
+                self.method = attrs["method"]
+        elif tag == "input" and "type" in attrs and "name" in attrs:
+            if attrs["type"] in ["hidden", "text", "password"]:
+                self.params[attrs["name"]] = attrs["value"] if "value" in attrs else ""
+
+    def handle_endtag(self, tag):
+        tag = tag.lower()
+        if tag == "form":
+            if not self.in_form:
+                raise RuntimeError("Unexpected end of <form>")
+            self.in_form = False
+            self.form_parsed = True
 
 class VKMusic:
     fdir = 'vk_music'
+    client_id = '3321812'
+    scope = ['audio']
 
     def __init__(self, email, passw, cookie='cookie.txt'):
         self.cookieFile = cookie
@@ -19,58 +59,67 @@ class VKMusic:
             os.remove(self.cookieFile)
     
     def doLogin(self, email, passw):
-        d = self.d = StringIO.StringIO()
-        c = self.c = pycurl.Curl()
-
-        c.setopt(c.VERBOSE, 0)
-        c.setopt(c.WRITEFUNCTION, d.write)
-        c.setopt(c.COOKIEJAR, self.cookieFile)
-        c.setopt(c.COOKIEFILE, self.cookieFile)
-        c.setopt(c.URL, 'vk.com/login.php?email=' + 
-                            email + '&pass=' + passw)
-        c.perform()
-        c.setopt(c.URL, 'vk.com/feed')
-        c.setopt(c.WRITEFUNCTION, d.write)
-        c.perform()
-        data = d.getvalue()
-        id_match = re.findall(r"id: (\d+),", data)
-        vk_id = -1
-        if len(id_match) > 0:
-            vk_id = int(id_match[0])
-        self.vk_id = vk_id
-        if vk_id != -1:
-            return True
-        else:
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()),
+                         urllib2.HTTPRedirectHandler())
+        self.opener = opener
+        response = opener.open("http://oauth.vk.com/oauth/authorize?" + \
+                               "redirect_uri=http://oauth.vk.com/blank.html&" + \
+                               "response_type=token&" + \
+                               "client_id=%s&scope=%s&display=wap" % (self.client_id, ",".join(self.scope))
+                              )
+        doc = response.read()
+        parser = FormParser()
+        parser.feed(doc)
+        parser.close()
+        if not parser.form_parsed or parser.url is None or "pass" not in parser.params or \
+          "email" not in parser.params:
+              raise RuntimeError("Something wrong")
+        parser.params["email"] = email
+        parser.params["pass"] = passw
+        if parser.method == "post":
+            #parser.url = parser.url.replace('https', 'http')
+            response = opener.open(parser.url, urllib.urlencode(parser.params))
+        doc = response.read()   
+        
+        parser = FormParser()
+        parser.feed(doc)
+        parser.close()
+        if urlparse(response.url).path != "/blank.html":
+            if not parser.form_parsed or parser.url is None:
+                  raise RuntimeError("Something wrong")
+            if parser.method == "post":
+                response = opener.open(parser.url, urllib.urlencode(parser.params))
+            else:
+                raise NotImplementedError("Method '%s'" % params.method)
+        url = response.geturl()
+        def split_key_value(kv_pair):
+            kv = kv_pair.split("=")
+            return kv[0], kv[1]
+        answer = dict(split_key_value(kv_pair) for kv_pair in urlparse(url).fragment.split("&"))
+        if "access_token" not in answer or "user_id" not in answer:
             return False
+        else:
+            self.access_token = answer["access_token"]
+            self.vk_id = answer["user_id"] 
+            return True
+    
+    def apiMethod(self, name, **kvargs):
+        opener = self.opener
+        kvargs['access_token'] = self.access_token
+        response = opener.open('https://api.vk.com/method/' + name,
+                               urllib.urlencode(kvargs))
+        return json.loads(response.read())['response']
             
     def getMusicList(self):
-        c = self.c
-        d = self.d
-        vk_id = self.vk_id
-        
-        c.setopt(c.WRITEFUNCTION, d.write)
-        c.setopt(c.URL, 'http://vk.com/audio')
-        c.setopt(c.POST, 1)
-        c.setopt(c.POSTFIELDS, 
-                    'act=load_audios_silent&al=1&edit=0&gid=0&id=' + 
-                    str(vk_id))
-        c.perform()
-        c.close()
-        s = d.getvalue()
-        s = s.decode("cp1251").encode("utf-8")
-        s = s[s.find('{"all":')+7:s.find('<!>{"sum')-1]
-        s = s.replace("'", '"')
-        try:
-            j = json.loads(s)
-        except:
-            raise VKMusicError('Error while parsing music list')
-        return j
+        mlist = self.apiMethod("audio.get", uid = self.vk_id, count=144)
+        self.count = len(mlist)
+        return mlist
         
     def isLoggedIn(self):
         return self.loggedIn
         
     def filesCount(self):
-        return len(self.mlist)
+        return self.count
         
     def fileInfo(self, i):
         return FileInfo(self.mlist[i])
@@ -96,12 +145,12 @@ class VKMusicError(Exception):
 
 class FileInfo:
     def __init__(self, fi):
-        self.uid = fi[0]
-        self.srcuid = fi[1]
-        self.link = fi[2]
-        self.duration = fi[4]
-        self.author = fi[5]
-        self.title = fi[6]
+        self.uid = fi['aid']
+        self.srcuid = fi['owner_id']
+        self.link = fi['url']
+        self.duration = fi['duration']
+        self.author = fi['artist']
+        self.title = fi['title']
         
     def strFormat(self):
         return '%s - %s (%s)' % (self.author, self.title, self.duration)
@@ -111,4 +160,3 @@ class FileInfo:
         
     def pathTitle(self):
         return self.title.replace('/', ' and ').replace('\\', ' and ')
-        

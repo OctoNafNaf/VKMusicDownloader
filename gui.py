@@ -12,8 +12,7 @@ class VKGtk(Gtk.Window):
         
         self.st = st = Gtk.Notebook()
         
-        align = Gtk.Alignment()
-        align.set(0.5, 0.5, 0.6, 0.0)
+        align = Gtk.Alignment.new(0.5, 0.5, 0.6, 0.0)
         
         mailEntry = Gtk.Entry()
         passEntry = Gtk.Entry()

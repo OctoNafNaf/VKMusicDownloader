@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from vkmusic import VKMusic, VKMusicError
 from urllib.request import urlretrieve
 import getpass, sys, os

@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import re, urllib, os, json, sys, http.cookiejar
 from urllib.request import urlretrieve
 from html.parser import HTMLParser

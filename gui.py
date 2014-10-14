@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from gi.repository import Gtk
 from vkmusic import VKMusic
 

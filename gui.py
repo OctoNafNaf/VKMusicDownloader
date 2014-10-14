@@ -1,32 +1,33 @@
 #!/usr/bin/python
 
-import gtk
-from vkmusic import VKMusic
+from gi.repository import Gtk
+#from vkmusic import VKMusic
 
-class VKGtk(gtk.Window):
+class VKGtk(Gtk.Window):
     
     def __init__(self):
         super(self.__class__, self).__init__()
         
         self.p = False
         
-        self.st = st = gtk.Notebook()
+        self.st = st = Gtk.Notebook()
         
-        align = gtk.Alignment(0.5, 0.5, 0.6, 0)
+        align = Gtk.Alignment()
+        align.set(0.5, 0.5, 0.6, 0.0)
         
-        mailEntry = gtk.Entry()
-        passEntry = gtk.Entry()
+        mailEntry = Gtk.Entry()
+        passEntry = Gtk.Entry()
         passEntry.set_invisible_char(u'\u2022')
         passEntry.set_visibility(False)
         self.mailEntry = mailEntry
         self.passEntry = passEntry
         
-        loginButton = gtk.Button("Login")
+        loginButton = Gtk.Button("Login")
         loginButton.connect("clicked", self.on_login)
         
-        table = gtk.Table(3, 3, True)
-        table.attach(gtk.Label("E-Mail"),   0, 1, 0, 1)
-        table.attach(gtk.Label("Password"), 0, 1, 1, 2)
+        table = Gtk.Table(3, 3, True)
+        table.attach(Gtk.Label("E-Mail"),   0, 1, 0, 1)
+        table.attach(Gtk.Label("Password"), 0, 1, 1, 2)
         table.attach(mailEntry,             1, 3, 0, 1)
         table.attach(passEntry,             1, 3, 1, 2)
         table.attach(loginButton,           2, 3, 2, 3)
@@ -37,15 +38,15 @@ class VKGtk(gtk.Window):
         st.set_show_tabs(False)
         self.add(st)
         
-        self.connect("destroy", gtk.main_quit)
+        self.connect("destroy", Gtk.main_quit)
         self.set_title("VKMusicDownloader")
         self.set_size_request(500, 300)
         self.show_all()
         
     def createMusicPage(self):
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
         
-        store = gtk.ListStore(bool, int, str, str, str)
+        store = Gtk.ListStore(bool, int, str, str, str)
         self.store = store
         fc = self.vk.filesCount()
         for i in xrange(fc):
@@ -53,47 +54,47 @@ class VKGtk(gtk.Window):
             l = [True, i + 1, fi.author, fi.title, fi.duration]
             store.append(l)
         
-        tree = gtk.TreeView(store)
+        tree = Gtk.TreeView(store)
         tree.set_rules_hint(True)
         
-        renderer = gtk.CellRendererToggle()
-        column = gtk.TreeViewColumn("Download", renderer, active = 0)
+        renderer = Gtk.CellRendererToggle()
+        column = Gtk.TreeViewColumn("Download", renderer, active = 0)
         renderer.connect("toggled", self.cell_toggled, store)
         column.set_sort_column_id(0)
         tree.append_column(column)
         columns = ['#', 'Artist', 'Title', 'Duration']
         for i in xrange(len(columns)):
-            renderer = gtk.CellRendererText()
-            column = gtk.TreeViewColumn(columns[i], renderer, text=i+1)
+            renderer = Gtk.CellRendererText()
+            column = Gtk.TreeViewColumn(columns[i], renderer, text=i+1)
             column.set_sort_column_id(i+1)
             tree.append_column(column)
             
-        sw = gtk.ScrolledWindow()
-        sw.set_shadow_type(gtk.SHADOW_ETCHED_IN)
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_shadow_type(Gtk.SHADOW_ETCHED_IN)
+        sw.set_policy(Gtk.POLICY_AUTOMATIC, Gtk.POLICY_AUTOMATIC)
         sw.add(tree)
         self.tree = tree
         vbox.add(sw)
-        downloadButton = gtk.Button("Download")
+        downloadButton = Gtk.Button("Download")
         downloadButton.connect("clicked", self.on_download)
-        al = gtk.Alignment(1, 1, 0, 0)
+        al = Gtk.Alignment(1, 1, 0, 0)
         al.add(downloadButton)
         vbox.pack_start(al, False)
         return vbox
         
     def createDownloadPage(self):
-        al = gtk.Alignment(0.5, 0.5, 0.8, 0)
-        vbox = gtk.VBox()
-        alLabel = gtk.Alignment(0, 0, 0, 0)
-        alLabel.add(gtk.Label("Total"))
+        al = Gtk.Alignment(0.5, 0.5, 0.8, 0)
+        vbox = Gtk.VBox()
+        alLabel = Gtk.Alignment(0, 0, 0, 0)
+        alLabel.add(Gtk.Label("Total"))
         vbox.add(alLabel)
-        self.totalProgress = gtk.ProgressBar()
+        self.totalProgress = Gtk.ProgressBar()
         vbox.add(self.totalProgress)
-        alLabel = gtk.Alignment(0, 0, 0, 0)
-        self.progressLabel = gtk.Label("Current")
+        alLabel = Gtk.Alignment(0, 0, 0, 0)
+        self.progressLabel = Gtk.Label("Current")
         alLabel.add(self.progressLabel)
         vbox.add(alLabel)
-        self.localProgress = gtk.ProgressBar()
+        self.localProgress = Gtk.ProgressBar()
         vbox.add(self.localProgress)
         vbox.set_spacing(5)
         al.add(vbox)
@@ -132,7 +133,7 @@ class VKGtk(gtk.Window):
         self.totalProgress.set_text("%.2f%%" % (tp * 100))
         self.localProgress.set_fraction(lp)
         self.localProgress.set_text("%.2f%%" % (lp * 100))
-        gtk.main_iteration()
+        Gtk.main_iteration()
         
     def cell_toggled(self, widget, path, model):
         model[path][0] = not model[path][0]
@@ -143,7 +144,7 @@ class VKGtk(gtk.Window):
 
 def run():
     window = VKGtk()
-    gtk.main()
+    Gtk.main()
 
 if __name__ == "__main__":
     run()

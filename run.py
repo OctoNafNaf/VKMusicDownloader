@@ -9,7 +9,7 @@ if __name__ == "__main__":
     else:
         vopt = args[1]
     if vopt == 'tui':
-	import tui
+        import tui
         tui.run()
     elif vopt == 'gui':
         import gui

@@ -16,7 +16,7 @@ def login():
     if not loggedIn:
         userError(u'Wrong password/e-mail :(')
     return vk
-    
+
 def select(msg, choice, default):
     sp = ('/'.join(choice))
     sp = sp.replace(default, '[%s]' % default)
@@ -24,7 +24,7 @@ def select(msg, choice, default):
     if (len(s) > 0) and (s[0] in choice):
         return s[0]
     return default
-    
+
 def showFiles(vk):
     files = vk.filesCount()
     print('Found %d files.' % (files))
@@ -33,7 +33,7 @@ def showFiles(vk):
         for i in range(files):
             j = vk.fileInfo(i)
             print(str(i + 1) + '. ' + j.strFormat())
-            
+
 def download(vk):
     st = select('Start downloading?', 'yn', 'y')
     if st == 'y':
@@ -60,9 +60,9 @@ def run():
     except VKMusicError:
         print('auth')
         vk = login()
-    showFiles(vk)   
+    showFiles(vk)
     print()
     download(vk)
-        
+
 if __name__ == "__main__":
     run()

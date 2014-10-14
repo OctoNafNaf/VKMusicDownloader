@@ -21,12 +21,12 @@ class FormParser(HTMLParser):
                 raise RuntimeError("Second form on page")
             if self.in_form:
                 raise RuntimeError("Already in form")
-            self.in_form = True 
+            self.in_form = True
         if not self.in_form:
             return
         attrs = dict((name.lower(), value) for name, value in attrs)
         if tag == "form":
-            self.url = attrs["action"] 
+            self.url = attrs["action"]
             if "method" in attrs:
                 self.method = attrs["method"]
         elif tag == "input" and "type" in attrs and "name" in attrs:
@@ -69,7 +69,7 @@ class VKMusic:
     def __del__(self):
         if os.path.exists(self.cookieFile):
             os.remove(self.cookieFile)
-    
+
     def doLogin(self, email, passw):
         opener = self.opener
         response = opener.open("http://oauth.vk.com/oauth/authorize?" + \
@@ -89,8 +89,8 @@ class VKMusic:
         if parser.method == "post":
             #parser.url = parser.url.replace('https', 'http')
             response = opener.open(parser.url, urllib.parse.urlencode(parser.params))
-        doc = response.read()   
-        
+        doc = response.read()
+
         parser = FormParser()
         parser.feed(doc)
         parser.close()
@@ -111,7 +111,7 @@ class VKMusic:
         else:
             self.access_token = answer["access_token"]
             self.saveAccessToken(self.access_token)
-            self.vk_id = answer["user_id"] 
+            self.vk_id = answer["user_id"]
             return True
 
     def testAccessToken(self):
@@ -120,7 +120,7 @@ class VKMusic:
             self.vk_id = users[0]['uid'] or None
             return self.vk_id != None
         return False
- 
+
     def saveAccessToken(self, access_token):
         with open(self.at_file, 'w') as f:
             f.write(access_token)
@@ -135,24 +135,24 @@ class VKMusic:
         response = opener.open('https://api.vk.com/method/' + name,
                                bytearray(urllib.parse.urlencode(kvargs), 'utf-8'))
         return json.loads(response.read().decode("utf-8"))['response']
-            
+
     def getMusicList(self):
         mlist = self.apiMethod("audio.get", uid = self.vk_id, count=144)
         self.count = len(mlist)
         return mlist
-        
+
     def isLoggedIn(self):
         return self.loggedIn
-        
+
     def filesCount(self):
         return self.count
-        
+
     def fileInfo(self, i):
         return FileInfo(self.mlist[i])
-        
+
     def setDir(self, newdir):
         self.fdir = newdir
-    
+
     def fileDownload(self, i, fname, sfunc):
         try:
             os.makedirs(self.fdir)
@@ -161,11 +161,11 @@ class VKMusic:
         link = self.fileInfo(i).link
         path = os.path.join(self.fdir, fname)
         urlretrieve(link, path, sfunc)
-        
+
 class VKMusicError(Exception):
     def __init__(self, value):
         self.value = value
-    
+
     def __str__(self):
         return repr(self.value)
 
@@ -177,12 +177,12 @@ class FileInfo:
         self.duration = fi['duration']
         self.author = fi['artist']
         self.title = fi['title']
-        
+
     def strFormat(self):
         return '%s - %s (%s)' % (self.author, self.title, self.duration)
-        
+
     def pathAuthor(self):
         return self.author.replace('/', ' and ').replace('\\', ' and ')
-        
+
     def pathTitle(self):
         return self.title.replace('/', ' and ').replace('\\', ' and ')

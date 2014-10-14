@@ -30,14 +30,14 @@ def showFiles(vk):
     print 'Found %d files.' % (files)
     st = select('Print all?', 'yn', 'y')
     if st == 'y':
-        for i in xrange(files):
+        for i in range(files):
             j = vk.fileInfo(i)
             print str(i + 1) + '. ' + j.strFormat()
             
 def download(vk):
     st = select('Start downloading?', 'yn', 'y')
     if st == 'y':
-        for i in xrange(vk.filesCount()):
+        for i in range(vk.filesCount()):
             j = vk.fileInfo(i)
             author = j.pathAuthor()
             name = j.pathTitle()

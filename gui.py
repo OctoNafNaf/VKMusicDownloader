@@ -48,7 +48,7 @@ class VKGtk(Gtk.Window):
         store = Gtk.ListStore(bool, int, str, str, str)
         self.store = store
         fc = self.vk.filesCount()
-        for i in xrange(fc):
+        for i in range(fc):
             fi = self.vk.fileInfo(i)
             l = [True, i + 1, fi.author, fi.title, fi.duration]
             store.append(l)
@@ -62,7 +62,7 @@ class VKGtk(Gtk.Window):
         column.set_sort_column_id(0)
         tree.append_column(column)
         columns = ['#', 'Artist', 'Title', 'Duration']
-        for i in xrange(len(columns)):
+        for i in range(len(columns)):
             renderer = Gtk.CellRendererText()
             column = Gtk.TreeViewColumn(columns[i], renderer, text=i+1)
             column.set_sort_column_id(i+1)
@@ -116,7 +116,7 @@ class VKGtk(Gtk.Window):
         self.show_all()
         self.st.next_page()
         self.k = 0
-        for i in xrange(self.fc):
+        for i in range(self.fc):
             if self.store[i][0]:
                 fi = self.vk.fileInfo(i)
                 text = "%d. %s" % (i + 1, fi.strFormat())

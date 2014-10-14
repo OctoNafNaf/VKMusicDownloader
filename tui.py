@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from vkmusic import VKMusic, VKMusicError
-from urllib import urlretrieve
+from urllib.request import urlretrieve
 import getpass, sys, os
 
 def userError(msg):
@@ -9,7 +9,7 @@ def userError(msg):
     exit(0)
 
 def login():
-    email = raw_input('E-Mail: ')
+    email = input('E-Mail: ')
     passw = getpass.getpass()
     vk = VKMusic(email, passw)
     loggedIn = vk.isLoggedIn()

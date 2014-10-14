@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-import pycurl, StringIO, re, urllib, os, getpass, json, sys, urllib2, cookielib
-from urllib import urlretrieve
-from HTMLParser import HTMLParser
-from urlparse import urlparse
+import re, urllib, os, json, sys, http.cookiejar
+from urllib.request import urlretrieve
+from html.parser import HTMLParser
+from urllib.parse import urlparse
 
 class FormParser(HTMLParser):
     def __init__(self):
@@ -48,8 +48,8 @@ class VKMusic:
     scope = ['audio', 'offline']
 
     def __init__(self, email=None, passw=None, cookie='cookie.txt'):
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()),
-                         urllib2.HTTPRedirectHandler())
+        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()),
+                         urllib.request.HTTPRedirectHandler())
         self.opener = opener
         if not email or not passw:
             try:
@@ -88,7 +88,7 @@ class VKMusic:
         parser.params["pass"] = passw
         if parser.method == "post":
             #parser.url = parser.url.replace('https', 'http')
-            response = opener.open(parser.url, urllib.urlencode(parser.params))
+            response = opener.open(parser.url, urllib.parse.urlencode(parser.params))
         doc = response.read()   
         
         parser = FormParser()
@@ -98,7 +98,7 @@ class VKMusic:
             if not parser.form_parsed or parser.url is None:
                   raise RuntimeError("Something wrong")
             if parser.method == "post":
-                response = opener.open(parser.url, urllib.urlencode(parser.params))
+                response = opener.open(parser.url, urllib.parse.urlencode(parser.params))
             else:
                 raise NotImplementedError("Method '%s'" % params.method)
         url = response.geturl()
@@ -133,8 +133,8 @@ class VKMusic:
         opener = self.opener
         kvargs['access_token'] = self.access_token
         response = opener.open('https://api.vk.com/method/' + name,
-                               urllib.urlencode(kvargs))
-        return json.loads(response.read())['response']
+                               bytearray(urllib.parse.urlencode(kvargs), 'utf-8'))
+        return json.loads(response.read().decode("utf-8"))['response']
             
     def getMusicList(self):
         mlist = self.apiMethod("audio.get", uid = self.vk_id, count=144)

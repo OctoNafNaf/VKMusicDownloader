@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from gi.repository import Gtk
-#from vkmusic import VKMusic
+from vkmusic import VKMusic
 
 class VKGtk(Gtk.Window):
     
@@ -50,7 +50,7 @@ class VKGtk(Gtk.Window):
         fc = self.vk.filesCount()
         for i in range(fc):
             fi = self.vk.fileInfo(i)
-            l = [True, i + 1, fi.author, fi.title, fi.duration]
+            l = [True, i + 1, fi.author, fi.title, str(fi.duration)]
             store.append(l)
         
         tree = Gtk.TreeView(store)
@@ -69,27 +69,25 @@ class VKGtk(Gtk.Window):
             tree.append_column(column)
             
         sw = Gtk.ScrolledWindow()
-        sw.set_shadow_type(Gtk.SHADOW_ETCHED_IN)
-        sw.set_policy(Gtk.POLICY_AUTOMATIC, Gtk.POLICY_AUTOMATIC)
         sw.add(tree)
         self.tree = tree
         vbox.add(sw)
         downloadButton = Gtk.Button("Download")
         downloadButton.connect("clicked", self.on_download)
-        al = Gtk.Alignment(1, 1, 0, 0)
+        al = Gtk.Alignment.new(1, 1, 0, 0)
         al.add(downloadButton)
-        vbox.pack_start(al, False)
+        vbox.pack_start(al, False, False, 0)
         return vbox
         
     def createDownloadPage(self):
-        al = Gtk.Alignment(0.5, 0.5, 0.8, 0)
+        al = Gtk.Alignment.new(0.5, 0.5, 0.8, 0)
         vbox = Gtk.VBox()
-        alLabel = Gtk.Alignment(0, 0, 0, 0)
+        alLabel = Gtk.Alignment.new(0, 0, 0, 0)
         alLabel.add(Gtk.Label("Total"))
         vbox.add(alLabel)
         self.totalProgress = Gtk.ProgressBar()
         vbox.add(self.totalProgress)
-        alLabel = Gtk.Alignment(0, 0, 0, 0)
+        alLabel = Gtk.Alignment.new(0, 0, 0, 0)
         self.progressLabel = Gtk.Label("Current")
         alLabel.add(self.progressLabel)
         vbox.add(alLabel)

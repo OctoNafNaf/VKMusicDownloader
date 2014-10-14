@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from vkmusic import VKMusic
+from vkmusic import VKMusic, VKMusicError
 from urllib import urlretrieve
 import getpass, sys, os
 
@@ -53,7 +53,13 @@ def showProgress(count, blockSize, totalSize):
     sys.stdout.flush()
 
 def run():
-    vk = login()
+    vk = None
+    try:
+        vk = VKMusic()
+        print 'from access_token'
+    except VKMusicError:
+        print 'auth'
+        vk = login()
     showFiles(vk)   
     print ''
     download(vk)

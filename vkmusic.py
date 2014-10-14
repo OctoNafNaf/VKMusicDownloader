@@ -42,26 +42,36 @@ class FormParser(HTMLParser):
             self.form_parsed = True
 
 class VKMusic:
+    at_file = '.access_token'
     fdir = 'vk_music'
     client_id = '3321812'
-    scope = ['audio']
+    scope = ['audio', 'offline']
 
-    def __init__(self, email, passw, cookie='cookie.txt'):
-        self.cookieFile = cookie
-        if os.path.exists(self.cookieFile):
-            os.remove(self.cookieFile)
-        self.loggedIn = self.doLogin(email, passw)
+    def __init__(self, email=None, passw=None, cookie='cookie.txt'):
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()),
+                         urllib2.HTTPRedirectHandler())
+        self.opener = opener
+        if not email or not passw:
+            try:
+                self.access_token = self.loadAccessToken()
+            except:
+                raise VKMusicError('Token file not found')
+            self.loggedIn = self.testAccessToken()
+        else:
+            self.cookieFile = cookie
+            if os.path.exists(self.cookieFile):
+                os.remove(self.cookieFile)
+            self.loggedIn = self.doLogin(email, passw)
+
         if self.loggedIn:
             self.mlist = self.getMusicList()
-        
+
     def __del__(self):
         if os.path.exists(self.cookieFile):
             os.remove(self.cookieFile)
     
     def doLogin(self, email, passw):
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()),
-                         urllib2.HTTPRedirectHandler())
-        self.opener = opener
+        opener = self.opener
         response = opener.open("http://oauth.vk.com/oauth/authorize?" + \
                                "redirect_uri=http://oauth.vk.com/blank.html&" + \
                                "response_type=token&" + \
@@ -100,9 +110,25 @@ class VKMusic:
             return False
         else:
             self.access_token = answer["access_token"]
+            self.saveAccessToken(self.access_token)
             self.vk_id = answer["user_id"] 
             return True
-    
+
+    def testAccessToken(self):
+        users = self.apiMethod('users.get')
+        if isinstance(users, list):
+            self.vk_id = users[0]['uid'] or None
+            return self.vk_id != None
+        return False
+ 
+    def saveAccessToken(self, access_token):
+        with open(self.at_file, 'w') as f:
+            f.write(access_token)
+
+    def loadAccessToken(self):
+        with open(self.at_file) as f:
+            return f.read().strip()
+
     def apiMethod(self, name, **kvargs):
         opener = self.opener
         kvargs['access_token'] = self.access_token
